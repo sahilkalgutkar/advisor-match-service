@@ -49,6 +49,14 @@ def experience_bucket(years: pd.Series) -> pd.Series:
     )
 
 
+def bucket_for_years(years: float | None) -> str | None:
+    """Single-value convenience wrapper around experience_bucket, for the API
+    path where an advisor is created one at a time rather than in a batch."""
+    if years is None:
+        return None
+    return experience_bucket(pd.Series([years])).iloc[0]
+
+
 def clean_advisors(df: pd.DataFrame) -> pd.DataFrame:
     cleaned = df.copy()
     cleaned["name"] = cleaned["name"].map(_clean_text)
