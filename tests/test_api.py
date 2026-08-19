@@ -57,6 +57,7 @@ def test_create_and_fetch_an_advisor(client):
     body = fetched.get_json()
     assert body["name"] == "Dr. Elena Vasquez"
     assert body["experience_bucket"] == "senior"
+    assert "embedding" not in body
 
 
 def test_get_unknown_advisor_returns_404(client):
@@ -88,3 +89,4 @@ def test_match_ranks_the_semantically_relevant_advisor_first(client):
     results = response.get_json()["results"]
     assert len(results) > 0
     assert results[0]["name"] == "Dr. Elena Vasquez"
+    assert "embedding" not in results[0]
