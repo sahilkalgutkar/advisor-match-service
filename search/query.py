@@ -34,6 +34,10 @@ def hybrid_search(
                 "fields": ["name^2", "bio", "tags"],
             }
         },
+        # The 384-dim vector is what makes the match, not something a client
+        # of this API needs back - excluding it at the ES level saves the
+        # round trip too, not just the response payload.
+        source_excludes=["embedding"],
         size=k,
     )
 

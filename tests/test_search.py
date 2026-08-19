@@ -74,6 +74,7 @@ def test_hybrid_search_ranks_the_semantically_relevant_advisor_first(indexed_cli
 
     assert len(results) > 0
     assert results[0]["name"] == "Dr. Elena Vasquez"
+    assert "embedding" not in results[0]
 
 
 def test_hybrid_search_respects_the_k_limit(indexed_client):

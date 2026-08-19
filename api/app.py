@@ -53,7 +53,7 @@ def create_app(es_client: Elasticsearch | None = None, index_name: str = INDEX_N
     @app.get("/advisors/<advisor_id>")
     def get_advisor(advisor_id: str):
         try:
-            doc = client.get(index=index_name, id=advisor_id)
+            doc = client.get(index=index_name, id=advisor_id, source_excludes=["embedding"])
         except NotFoundError:
             return jsonify({"error": "advisor not found"}), 404
         return jsonify(doc["_source"])
