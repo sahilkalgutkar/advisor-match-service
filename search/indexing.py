@@ -1,7 +1,7 @@
 """Elasticsearch index mapping and bulk indexing for advisor profiles."""
 
 import pandas as pd
-from elasticsearch import Elasticsearch
+from elasticsearch import BadRequestError, Elasticsearch
 from elasticsearch.helpers import bulk
 
 from embed.model import EMBEDDING_DIM
@@ -28,8 +28,18 @@ INDEX_MAPPING = {
 
 
 def ensure_index(client: Elasticsearch, index_name: str = INDEX_NAME) -> None:
-    if not client.indices.exists(index=index_name):
+    if client.indices.exists(index=index_name):
+        return
+
+    try:
         client.indices.create(index=index_name, body=INDEX_MAPPING)
+    except BadRequestError as e:
+        # Two Gunicorn workers can both pass the exists() check before either
+        # creates the index - a real race hit running this behind multiple
+        # workers locally. The desired end state (index exists) is already
+        # true when this specific error fires, so it's a no-op, not a failure.
+        if e.error != "resource_already_exists_exception":
+            raise
 
 
 def index_advisors(

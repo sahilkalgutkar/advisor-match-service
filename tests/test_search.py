@@ -85,6 +85,15 @@ def test_hybrid_search_respects_the_k_limit(indexed_client):
     assert len(results) <= 2
 
 
+def test_ensure_index_is_idempotent_when_the_index_already_exists(es_client):
+    """Two Gunicorn workers both calling create_app() at startup can both see
+    exists()=False before either has created the index - ensure_index must
+    treat the resulting "already exists" error as success, not raise."""
+    ensure_index(es_client, index_name="advisors-idempotent-test")
+
+    ensure_index(es_client, index_name="advisors-idempotent-test")
+
+
 def test_index_advisors_handles_a_missing_years_experience_and_bucket(es_client):
     """An advisor with no years-of-experience has no experience_bucket either
     (both come out as NaN from preprocess.clean.experience_bucket, not a
