@@ -85,6 +85,36 @@ def test_hybrid_search_respects_the_k_limit(indexed_client):
     assert len(results) <= 2
 
 
+def test_index_advisors_handles_a_missing_years_experience_and_bucket(es_client):
+    """An advisor with no years-of-experience has no experience_bucket either
+    (both come out as NaN from preprocess.clean.experience_bucket, not a
+    plain Python None) - indexing must convert that to valid JSON null rather
+    than sending the literal NaN token, which Elasticsearch's strict parser
+    rejects outright."""
+    ensure_index(es_client, index_name="advisors-missing-years-test")
+    advisors = pd.DataFrame(
+        [
+            {
+                "id": 200,
+                "name": "No Experience Listed",
+                "bio": "A bio with no years of experience on file.",
+                "tags": [],
+                "years_experience": float("nan"),
+                "experience_bucket": float("nan"),
+            }
+        ]
+    )
+    embedder = get_embedder()
+    embeddings = embedder.embed_texts(advisors["bio"].tolist())
+
+    count = index_advisors(es_client, advisors, embeddings, index_name="advisors-missing-years-test")
+
+    assert count == 1
+    doc = es_client.get(index="advisors-missing-years-test", id="200")
+    assert doc["_source"]["years_experience"] is None
+    assert doc["_source"]["experience_bucket"] is None
+
+
 def test_index_advisors_reports_the_number_indexed(es_client):
     ensure_index(es_client, index_name="advisors-count-test")
     advisors = pd.DataFrame(

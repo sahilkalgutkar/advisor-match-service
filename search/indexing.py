@@ -49,7 +49,7 @@ def index_advisors(
                 "bio": row.bio,
                 "tags": row.tags,
                 "years_experience": None if pd.isna(row.years_experience) else float(row.years_experience),
-                "experience_bucket": row.experience_bucket,
+                "experience_bucket": None if pd.isna(row.experience_bucket) else row.experience_bucket,
                 "embedding": embeddings[i].tolist(),
             },
         }
