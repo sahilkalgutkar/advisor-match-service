@@ -46,7 +46,27 @@ flowchart LR
 docker compose up --build
 ```
 
-Brings up the API and a real Elasticsearch instance. Seed it with the sample advisor dataset:
+Brings up the API and a real Elasticsearch instance.
+
+| Service | URL | Host port override |
+|---|---|---|
+| API | http://localhost:8080 | `API_HOST_PORT` |
+| Elasticsearch | http://localhost:9200 | `ELASTICSEARCH_HOST_PORT` |
+
+> Both host ports are overridable — 9200 is taken on any machine already
+> running an Elasticsearch or OpenSearch. Set them inline or in `.env` (see
+> `.env.example`), and point the seed script's `ELASTICSEARCH_URL` at whichever
+> port you chose:
+>
+> ```bash
+> ELASTICSEARCH_HOST_PORT=9201 docker compose up --build
+> ELASTICSEARCH_URL=http://localhost:9201 python -m scripts.seed_index
+> ```
+>
+> Only the host side moves — inside the compose network the API still reaches
+> Elasticsearch on `http://elasticsearch:9200`.
+
+Seed it with the sample advisor dataset:
 
 ```bash
 pip install -r requirements.txt
